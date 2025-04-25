@@ -4,3 +4,4 @@ __pycache__/
 *.so
 *.pyo
 *.pyd
+db.sqlite3
