@@ -1,9 +1,10 @@
 from django.db import models
 from api.companies.models import Company, Department
+from encrypted_model_fields.fields import EncryptedCharField
 
 class Employee(models.Model):
     name = models.CharField(max_length=255)
-    employee_id = models.CharField(max_length=50, blank=True, null=True)
+    employee_id = EncryptedCharField(models.CharField(max_length=50, blank=True, null=True))
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     

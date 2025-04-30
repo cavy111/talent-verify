@@ -6,6 +6,8 @@ from rest_framework.response import Response
 import io
 import csv
 from rest_framework import filters
+from rest_framework.permissions import IsAuthenticated
+from core.permissions import IsCompanyUser, IsTalentVerifyAdmin
 
 class EmployeeViewSet(viewsets.ModelViewSet):
     queryset = Employee.objects.all()
@@ -14,6 +16,31 @@ class EmployeeViewSet(viewsets.ModelViewSet):
     search_fields = ['name', 'employee_id', 'employment_records__company__name', 
                      'employment_records__department__name', 'employment_records__role',
                      'employment_records__date_started', 'employment_records__date_left']
+
+    def get_permissions(self):
+        """
+        - List/retrieve/search: Any authenticated user
+        - Create/update/delete/bulk_create: Company users or Talent Verify admins
+        """
+        if self.action in ['list', 'retrieve', 'search']:
+            permission_classes = [IsAuthenticated]
+        elif self.action in ['create', 'update', 'destroy', 'bulk_create']:
+            permission_classes = [IsCompanyUser | IsTalentVerifyAdmin]
+        else:
+            permission_classes = []
+        return [permission() for permission in permission_classes]
+    
+    def get_queryset(self):
+        """
+        Company users can only see employees with records at their company.
+        Talent Verify admins can see all employees.
+        """
+        user = self.request.user
+        if user.user_type == 'admin':
+            return Employee.objects.all()
+        elif user.user_type == 'company':
+            return Employee.objects.filter(employment_records__company=user.company).distinct()
+        return Employee.objects.all()
 
     @action(detail=False, methods=['get'])
     def search(self, request):

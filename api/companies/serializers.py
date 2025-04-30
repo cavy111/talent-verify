@@ -7,6 +7,8 @@ class DepartmentSerializer(serializers.ModelSerializer):
         fields = ['id', 'name']
 
 class CompanySerializer(serializers.ModelSerializer):
+    departments = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+
     class Meta:
         model = Company
         fields = ['id', 'name', 'registration_date', 'registration_number',
