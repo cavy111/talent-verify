@@ -30,11 +30,25 @@ const Navbar = () => {
                         <Nav.Link as={Link} to='/companies'>Companies</Nav.Link>
                         <Nav.Link as={Link} to='/employees'>Employees</Nav.Link>
                         {/* Show bulk upload only for admin and company users */}
+                        {currentUser && ['admin','company'].includes(currentUser.user_type) && 
+                        (
+                            <Nav.Link as={Link} to='/bulk-upload'>Bulk Upload</Nav.Link>
+                        )
+                        }
                     </Nav>
+
+                    {currentUser && (
+                        <Nav>
+                            <Nav.Item className='d-flex align-items-center text-light me-3'>
+                                {currentUser.username}
+                            </Nav.Item>
+                            <Button variant="outline-light" onClick={handleLogout}>
+                                Logout
+                            </Button>
+                        </Nav>
+                    )}
+
                 </BootstrapNavbar.Collapse>
-
-
-
             </Container>
         </BootstrapNavbar>
 
