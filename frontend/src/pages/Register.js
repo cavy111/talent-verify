@@ -11,7 +11,7 @@ const LoginSchema = Yup.object().shape({
     password: Yup.string().required('Password is required'),
 });
 
-const Login = () => {
+const Register = () => {
 const [error, setError] = useState('');
 const navigate = useNavigate();
 const { setCurrentUser } = useContext(AuthContext);
@@ -74,7 +74,7 @@ return(
                             )}
                         </Formik>
                         <br/>
-                        Don't have an account? <a href="/register">Register here</a>
+                        Already have an account? <a href="/login">Login here</a>
                     </Card.Body>
                 </Card>
             </Col>
@@ -84,4 +84,4 @@ return(
 
 }
 
-export default Login;
+export default Register;

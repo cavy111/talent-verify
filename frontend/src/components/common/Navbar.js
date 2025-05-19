@@ -1,8 +1,8 @@
 import React, { useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Navbar as BootstrapNavbar, Nav, Container, Button } from 'react-bootstrap';
-import { AuthContext } from '../context/AuthContext';
-import { logout } from '../api/auth';
+import { AuthContext } from '../../context/AuthContext'
+import { logout } from '../../api/auth';
 
 
 const Navbar = () => {

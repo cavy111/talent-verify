@@ -1,9 +1,14 @@
-import { useEffect } from "react";
+import { useEffect, useState, useContext } from "react";
 import { bulkUploadEmployees } from "../api/api";
 import Navbar from "../components/common/Navbar";
 import { Alert, Button, Card, Container, ProgressBar } from "react-bootstrap";
 import { Formik } from "formik";
 import { Form } from "react-router-dom";
+import * as Yup from 'yup';
+import { AuthContext } from '../context/AuthContext';
+import { getCompanies } from "../api/api";
+import Papa from 'papaparse';
+import * as XLSX from 'xlsx';
 
 const BulkUploadShema = Yup.object().shape({
     file: Yup.mixed().required("File is required"),
@@ -128,7 +133,7 @@ const BulkUpload = () =>{
                                         disabled={currentUser?.user_type === 'company'}
                                     >
                                         <option value="">Select a company</option>
-                                        {companies.map(()=>(
+                                        {companies.map((company)=>(
                                             <option key={company.id} value={company.id}>
                                                 {company.name}
                                             </option>

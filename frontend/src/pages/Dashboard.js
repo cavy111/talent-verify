@@ -1,4 +1,4 @@
-import { Card, Col, Container, Navbar, Row } from "react-bootstrap";
+import { Card, Col, Container, Row } from "react-bootstrap";
 import React, { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import Navbar from '../components/common/Navbar';
@@ -42,36 +42,36 @@ const Dashboard = () => {
             <Row className="mt-4">
                 <Col md={4}>
                     <Card className="text-center mb-3">
-                        <Card.body>
+                        <Card.Body>
                             <Card.Title>Companies</Card.Title>
                             <Card.Text>
                                 {stats.companies}
                             </Card.Text>
-                        </Card.body>
+                        </Card.Body>
                     </Card>
                 </Col>
 
                 <Col md={4}>
                     <Card className="text-center mb-3">
-                        <Card.body>
+                        <Card.Body>
                             <Card.Title>Employees</Card.Title>
                             <Card.Text>
                                 {stats.employees}
                             </Card.Text>
-                        </Card.body>
+                        </Card.Body>
                     </Card>
                 </Col>
 
                 <Col md={4}>
                 <Card className="text-center mb-3">
-                    <Card.body>
+                    <Card.Body>
                         <Card.Title>Your Role</Card.Title>
                         <Card.Text className="display-6">
                             {currentUser?.user_type === 'admin' && 'Administrator'}
                             {currentUser?.user_type === 'company' && 'Company User'}
                             {currentUser?.user_type === 'verifier' && 'Verifier'}
                         </Card.Text>
-                    </Card.body>
+                    </Card.Body>
                 </Card>
                 </Col>
 

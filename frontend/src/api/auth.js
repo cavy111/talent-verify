@@ -4,7 +4,7 @@ const API_URL = 'http://localhost:8000/';
 
 export const login = async (username, password) => {
   try {
-    const response = await axios.post(`${API_URL}login/`, {
+    const response = await axios.post(`${API_URL}users/login/`, {
       username,
       password,
     });
