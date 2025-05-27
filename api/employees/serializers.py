@@ -1,7 +1,10 @@
 from rest_framework import serializers
 from .models import Employee, EmploymentRecord
+from api.companies.serializers import CompanySerializer
 
 class EmployeeRecordSerializer(serializers.ModelSerializer):
+    company = CompanySerializer(read_only=True)
+
     class Meta:
         model = EmploymentRecord
         fields = [ 'id', 'company', 'department',

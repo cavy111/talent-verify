@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Form, Row, Col, Button, Table, Card } from 'react-bootstrap';
+import { Container, Form, Row, Col, Button, Table, Card, Alert } from 'react-bootstrap';
 import Navbar from "../../components/common/Navbar";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Formik, Field } from 'formik';
 import { searchEmployees, getEmployees } from '../../api/api';
 
 const EmployeeList = () => {
+    const location = useLocation();
+    const [message, setMessage] = useState(location.state?.message || '');
     const [employees, setEmployees] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -47,6 +49,9 @@ const EmployeeList = () => {
         <>
         <Navbar/>
         <Container className="mt-4">
+        <Alert show={!!message} variant="success" dismissible onClose={()=>setMessage(null)} className="mt-4">
+            {message}
+        </Alert>
             <h1>Employee Search</h1>
 
             <Card className="mb-4">

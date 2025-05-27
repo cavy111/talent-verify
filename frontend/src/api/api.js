@@ -46,6 +46,10 @@ export const getEmployees = () => {
     return api.get('employees/');
 }
 
+export const getEmployee = (id) => {
+    return api.get(`employees/${id}/`);
+}
+
 export const searchEmployees = (params) => {
     return api.get('employees/search/', {params});
 }

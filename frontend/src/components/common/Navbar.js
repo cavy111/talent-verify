@@ -8,7 +8,7 @@ import { logout } from '../../api/auth';
 const Navbar = () => {
     const navigate = useNavigate();
     const { currentUser, setCurrentUser } = useContext(AuthContext);
-
+    
     const handleLogout = async () => {
         try {
             await logout();
@@ -29,6 +29,8 @@ const Navbar = () => {
                         <Nav.Link as={Link} to='/'>Dashboard</Nav.Link>
                         <Nav.Link as={Link} to='/companies'>Companies</Nav.Link>
                         <Nav.Link as={Link} to='/employees'>Employees</Nav.Link>
+                        <Nav.Link as={Link} to='/add-employee'>Add Employee</Nav.Link>
+                        <Nav.Link as={Link} to='/bulk-upload'>{currentUser.username}</Nav.Link>
                         {/* Show bulk upload only for admin and company users */}
                         {currentUser && ['admin','company'].includes(currentUser.user_type) && 
                         (

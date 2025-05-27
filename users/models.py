@@ -10,7 +10,7 @@ class CustomUser(AbstractUser):
         ('verifier','Verification User'),
     )
 
-    user_type = models.CharField(max_length=10, choices=USER_TYPE_CHOICES, default='verifier')
+    user_type = models.CharField(max_length=10, choices=USER_TYPE_CHOICES, default='company')
     company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
