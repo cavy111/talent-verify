@@ -1,9 +1,8 @@
 import { useEffect, useState, useContext } from "react";
 import { bulkUploadEmployees } from "../api/api";
 import Navbar from "../components/common/Navbar";
-import { Alert, Button, Card, Container, ProgressBar } from "react-bootstrap";
-import { Formik } from "formik";
-import { Form } from "react-router-dom";
+import { Alert, Button, Card, Container, ProgressBar, Form } from "react-bootstrap";
+import { Formik, Form as FormikForm } from "formik";
 import * as Yup from 'yup';
 import { AuthContext } from '../context/AuthContext';
 import { getCompanies } from "../api/api";
@@ -117,20 +116,20 @@ const BulkUpload = () =>{
                     <Formik
                         initialValues={{
                             file: null,
-                            companyId: currentUser?.user_type === 'company' ? currentUser.company.id : '',
+                            companyId: currentUser.user_type === 'company' ? currentUser.company.id : '',
                         }}
                         validationSchema={BulkUploadShema}
                         onSubmit={handleSubmit}
                         >
                         {({handleSubmit, setFieldValue, values, errors, touched})=>(
-                            <Form onSubmit={handleSubmit}>
+                            <FormikForm onSubmit={handleSubmit}>
                                 <Form.Group className="mb-3">
                                     <Form.Label>Select Company</Form.Label>
-                                    <Form.select
+                                    <Form.Select
                                         name="companyId"
                                         value={values.companyId}
                                         onChange={(e) => setFieldValue("companyId", e.target.value)}
-                                        disabled={currentUser?.user_type === 'company'}
+                                        disabled={currentUser.user_type === 'company'}
                                     >
                                         <option value="">Select a company</option>
                                         {companies.map((company)=>(
@@ -138,7 +137,7 @@ const BulkUpload = () =>{
                                                 {company.name}
                                             </option>
                                         ))}
-                                    </Form.select>
+                                    </Form.Select>
                                     {touched.companyId && errors.companyId && (
                                         <div className="text-danger">{errors.companyId}</div>
                                     )}
@@ -167,7 +166,7 @@ const BulkUpload = () =>{
                                         {isLoading ? 'Uploading...' : 'Upload'}
                                     </Button>
 
-                            </Form>
+                            </FormikForm>
                         )}
                         </Formik>
                 </Card.Body>

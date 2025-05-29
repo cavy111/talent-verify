@@ -41,6 +41,10 @@ export const updateCompany = (id, companyData) => {
     return api.put(`companies/${id}/`, companyData);
 }
 
+export const getCompanyDepartments = (companyId) => {
+    return api.get(`companies/${companyId}/departments/`);
+}
+
 // employee API calls
 export const getEmployees = () => {
     return api.get('employees/');
@@ -63,7 +67,7 @@ export const getEmploymentRecords = (employeeId) => {
 }
 
 export const createEmploymentRecord = (employeeId, employmentRecordData) => {
-    return api.post(`employees/${employeeId}/employment_records/`, employmentRecordData);
+    return api.post(`employees/${employeeId}/employment-records/`, employmentRecordData);
 }
 
 // bulk upload

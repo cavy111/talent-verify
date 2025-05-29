@@ -1,14 +1,14 @@
 import Navbar from "../../components/common/Navbar";
-import { Container, Card, Table } from "react-bootstrap";
+import { Container, Card, Table, Alert} from "react-bootstrap";
 import { getEmployee } from "../../api/api";
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams, useLocation } from "react-router-dom";
 
 const EmployeeDetail = () => {
+const location = useLocation()
+const [message, setMessage] = useState(location.state?.message || '')
 const {id} = useParams();
 const [employee, setEmployee] = useState(null);
-console.log(employee);
-
 
 useEffect(() => {
     const fetchEmployee = async ()=>{
@@ -41,9 +41,14 @@ useEffect(() => {
                     </Table>):(<p>Loading employee details...</p>)}
                 </Card.Body>
             </Card>
+            <Alert className="mt-4" variant="success" show={!!message} dismissible onClose={()=>setMessage(null)}>{message}</Alert>
             <Card className="mt-4">
+                <Card.Header className="d-flex justify-content-between align-items-center">
+                    <Card.Title className="mb-0">Employment Records</Card.Title>
+                    <Link to={`/add-employment-record/${id}`} className="btn btn-primary btn-sm" >Add Employment Record</Link>
+                </Card.Header>
                 <Card.Body>
-                    <Card.Title>Employment Records</Card.Title>
+                    
                     <Table striped bordered hover>
                         <thead>
                             <tr>
@@ -57,7 +62,7 @@ useEffect(() => {
                             {employee && employee.employment_records && employee.employment_records.length > 0 ? (
                                 employee.employment_records.map((record, index) => (
                                     <tr key={index}>
-                                        <td>{record.company.name}</td>
+                                        <td>{record.company_details.name}</td>
                                         <td>{record.role}</td>
                                         <td>{new Date(record.date_started).toLocaleDateString()}</td>
                                         <td>{record.date_left ? new Date(record.date_left).toLocaleDateString() : 'Present'}</td>

@@ -2,6 +2,7 @@ from rest_framework import serializers
 from users.models import CustomUser
 from api.companies.serializers import CompanySerializer
 from api.companies.models import Company
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -27,3 +28,21 @@ class UserSerializer(serializers.ModelSerializer):
             company=company_instance
         )
         return user
+    
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)
+
+        # Add extra user data in the response
+        data['id'] = self.user.id
+        data['username'] = self.user.username
+        data['email'] = self.user.email
+        data['user_type'] = self.user.user_type
+
+        if self.user.company:
+            data['company'] = {
+                'id': self.user.company.id,
+                'name': self.user.company.name,
+            }
+
+        return data
