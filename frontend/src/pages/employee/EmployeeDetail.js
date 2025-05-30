@@ -54,6 +54,7 @@ useEffect(() => {
                             <tr>
                                 <th>Company</th>
                                 <th>Role</th>
+                                <th>Duties</th>
                                 <th>Date Joined</th>
                                 <th>Date Left</th>
                             </tr>
@@ -64,6 +65,7 @@ useEffect(() => {
                                     <tr key={index}>
                                         <td>{record.company_details.name}</td>
                                         <td>{record.role}</td>
+                                        <td>{record.duties}</td>
                                         <td>{new Date(record.date_started).toLocaleDateString()}</td>
                                         <td>{record.date_left ? new Date(record.date_left).toLocaleDateString() : 'Present'}</td>
                                     </tr>

@@ -19,5 +19,10 @@ class Department(models.Model):
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='departments')
     name = models.CharField(max_length=255)
     
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['company','name'], name='unique_department_per_company')
+        ]
+
     def __str__(self):
         return f"{self.name} - {self.company.name}"

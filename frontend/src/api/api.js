@@ -37,6 +37,10 @@ export const createCompany = (companyData) => {
     return api.post('companies/', companyData);
 }
 
+export const createCompanyDepartment = (companyId,companyDepartmentData) => {
+    return api.post(`companies/${companyId}/departments/`, companyDepartmentData);
+}
+
 export const updateCompany = (id, companyData) => {
     return api.put(`companies/${id}/`, companyData);
 }

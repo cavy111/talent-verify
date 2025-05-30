@@ -4,7 +4,17 @@ from .models import Company, Department
 class DepartmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Department
-        fields = ['id', 'name']
+        fields = ['id', 'name', 'company']
+
+    def validate(self, data):
+        company = data.get('company')
+        name = data.get('name')
+
+        if Department.objects.filter(company=company, name__iexact=name).exists():
+            raise serializers.ValidationError({
+                'name': 'A department with this name already exists for this company.'
+            })
+        return data
 
 class CompanySerializer(serializers.ModelSerializer):
     departments = serializers.PrimaryKeyRelatedField(many=True, read_only=True)

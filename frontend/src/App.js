@@ -8,6 +8,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import CompanyList from './pages/company/CompanyList';
+import AddCompanyDepartment from './pages/company/AddCompanyDepartment';
 import CompanyDetail from './pages/company/CompanyDetail';
 import EmployeeList from './pages/employee/EmployeeList';
 import AddEmployee from './pages/employee/AddEmployee';
@@ -31,6 +32,7 @@ function App() {
           {/* <Route path="/unauthorized" element={<Unauthorized />} /> */}
           <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
           <Route path="/companies" element={<PrivateRoute><CompanyList /></PrivateRoute>} />
+          <Route path="/add-department/:id" element={<PrivateRoute><AddCompanyDepartment /></PrivateRoute>} />
           <Route path="/companies/:id" element={<PrivateRoute><CompanyDetail /></PrivateRoute>} />
           <Route path="/employees" element={<PrivateRoute><EmployeeList /></PrivateRoute>} />
           <Route path="/employees/:id" element={<PrivateRoute><EmployeeDetail /></PrivateRoute>} />

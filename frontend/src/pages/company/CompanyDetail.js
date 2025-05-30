@@ -1,21 +1,23 @@
 import Navbar from "../../components/common/Navbar";
-import { Card, Container, Table} from "react-bootstrap";
-import { getCompany } from "../../api/api";
-import { useParams } from "react-router-dom";
+import { Alert, Button, Card, Container, Table} from "react-bootstrap";
+import { getCompany, getCompanyDepartments } from "../../api/api";
+import { useParams, Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 const CompanyDetail = () => {
     const { id } = useParams();
+    const location = useLocation()
     const [company, setCompany] = useState(null);
-    console.log(company);
-    
+    const [departments, setDepartments] = useState([])
+    const [message, setMessage] = useState( location?.state?.message || '')    
 
     useEffect(() => {
         const fetchCompany = async () => {
             try {
                 const response = await getCompany(id);
-                // console.log(response);
+                const departmentResponse = await getCompanyDepartments(id)
                 setCompany(response.data);
+                setDepartments(departmentResponse.data)
             } catch (error) {
                 console.error('Error fetching company details:', error);
             }
@@ -61,6 +63,20 @@ const CompanyDetail = () => {
                 </Table>) : (
                     <p>Loading company details...</p>
                 )}
+            </Card.Body>
+        </Card>
+        <Alert className="mt-4" variant="success" dismissible show={!!message} onClose={()=>setMessage('')}>{message}</Alert>
+        <Card className="mt-4">
+            <Card.Header className="align-items-center justify-content-between d-flex">
+                <Card.Title>Departments</Card.Title>
+                <Link to={`/add-department/${id}`} className="btn btn-primary btn-sm" >Add Department</Link> 
+            </Card.Header>
+            <Card.Body>
+                <ul>
+                { departments.map((dep)=>(
+                    <li key={dep.id}>{dep.name}</li>
+                ))}
+                </ul>
             </Card.Body>
         </Card>
         </Container>
