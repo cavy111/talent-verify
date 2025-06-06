@@ -1,5 +1,5 @@
 import Navbar from "../../components/common/Navbar";
-import { Container, Card, Table, Alert} from "react-bootstrap";
+import { Container, Card, Table, Alert, Row, Col} from "react-bootstrap";
 import { getEmployee } from "../../api/api";
 import { useState, useEffect } from "react";
 import { Link, useParams, useLocation } from "react-router-dom";
@@ -26,21 +26,23 @@ useEffect(() => {
         <>
         <Navbar />
         <Container>
-            <Card className="mt-4">
-                <Card.Body>
-                    <Card.Title>Employee Details</Card.Title>
-                    {employee?(<Table striped bordered hover>
-                        <tbody>
-                            <tr>
-                                <th>Name</th>
-                                <td>{employee.name}</td>
-                                <th>Employee ID</th>
-                                <td>{employee.employee_id}</td>
-                            </tr>
-                        </tbody>
-                    </Table>):(<p>Loading employee details...</p>)}
-                </Card.Body>
-            </Card>
+            
+                    {employee?(
+                        <div>
+                            <h5 className="mt-3">Employee Details</h5>
+                            <Row>
+                                <Col md={4}>
+                                    <strong>Name:</strong> {employee.name}
+                                </Col>
+                            </Row>
+                            <Row >
+                                <Col md={4}>
+                                    <strong>Employee ID:</strong> {employee.employee_id}
+                                </Col>
+                            </Row>
+                        </div>
+                    ):(<p>Loading employee details...</p>)}
+                
             <Alert className="mt-4" variant="success" show={!!message} dismissible onClose={()=>setMessage(null)}>{message}</Alert>
             <Card className="mt-4">
                 <Card.Header className="d-flex justify-content-between align-items-center">
@@ -53,6 +55,7 @@ useEffect(() => {
                         <thead>
                             <tr>
                                 <th>Company</th>
+                                <th>Department</th>
                                 <th>Role</th>
                                 <th>Duties</th>
                                 <th>Date Joined</th>
@@ -64,6 +67,7 @@ useEffect(() => {
                                 employee.employment_records.map((record, index) => (
                                     <tr key={index}>
                                         <td>{record.company_details.name}</td>
+                                        <td>{record.department_details.name}</td>
                                         <td>{record.role}</td>
                                         <td>{record.duties}</td>
                                         <td>{new Date(record.date_started).toLocaleDateString()}</td>

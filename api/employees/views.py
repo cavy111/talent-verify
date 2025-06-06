@@ -8,6 +8,7 @@ import csv
 from rest_framework import filters
 from rest_framework.permissions import IsAuthenticated
 from core.permissions import IsCompanyUser, IsTalentVerifyAdmin
+from api.companies.models import Department
 
 class EmployeeViewSet(viewsets.ModelViewSet):
     queryset = Employee.objects.all()
@@ -79,13 +80,30 @@ class EmployeeViewSet(viewsets.ModelViewSet):
     def bulk_create(self, request):
         
         file = request.FILES.get('file')
+        company_id = request.data.get('company_id')
+
+        if not company_id:
+            return Response({"error": "Company ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
         if not file:
             return Response({"error": "No file provided"}, status=status.HTTP_400_BAD_REQUEST)
         
-        decoded_file = file.read().decode('utf-8')
+        try:
+            decoded_file = file.read().decode('utf-8')
+        except UnicodeDecodeError:
+            file.seek(0)
+            decoded_file = file.read().decode('latin1')
         io_string = io.StringIO(decoded_file)
 
         reader = csv.DictReader(io_string)
+
+        required_fields = ['employee_name', 'department_name', 'company_id', 'role', 'date_started']
+
+        missing_fields = [field for field in required_fields if field not in reader.fieldnames]
+
+        if missing_fields:
+            return Response({"error": f"CSV file is missing required fields: {', '.join(missing_fields)}"}, 
+                            status=status.HTTP_400_BAD_REQUEST)
 
         created_count = 0
         updated_count = 0
@@ -95,7 +113,7 @@ class EmployeeViewSet(viewsets.ModelViewSet):
             try:
                 # Create or update employee
                 employee, created = Employee.objects.get_or_create(
-                    name=row['name'],
+                    name=row['employee_name'],
                     defaults={
                         'employee_id': row.get('employee_id', None),
                     }
@@ -104,6 +122,26 @@ class EmployeeViewSet(viewsets.ModelViewSet):
                     created_count += 1
                 else:
                     updated_count += 1
+                    
+                # Get or create department
+                department, _ = Department.objects.get_or_create(
+                    company_id=company_id,
+                    name=row['department_name']
+                )
+                
+                # Create employment record
+                employment_record, _ = EmploymentRecord.objects.update_or_create(
+                    employee=employee,
+                    company_id=company_id,
+                    department=department,
+                    role=row['role'],
+                    defaults={
+                        'date_started': row['date_started'],
+                        'date_left': row.get('date_left') or None,
+                        'duties': row.get('duties', ''),
+                    }
+                )
+
             except Exception as e:
                 errors.append(f"Error processing row {row}: {str(e)}")
 
@@ -124,3 +162,5 @@ class EmploymentRecordViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         employee_id = self.kwargs['employee_pk']
         serializer.save(employee_id=employee_id)
+
+    

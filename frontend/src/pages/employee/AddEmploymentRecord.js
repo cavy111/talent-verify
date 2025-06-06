@@ -24,7 +24,7 @@ const AddEmploymentRecord = () => {
     const [error, setError] = useState('');
     const [companies, setCompanies] = useState([])
     const [departments, setDepartments] = useState([])
-    const [selectedCompanyId, setSelectedCompanyId] = useState('')
+    const [selectedCompanyId, setSelectedCompanyId] = useState(currentUser.user_type ==='company' ? currentUser.company.id : '')
 
     useEffect(()=>{
         const fetchCompanies = async() =>{
@@ -85,7 +85,7 @@ const AddEmploymentRecord = () => {
                             department:'',
                             role:'',
                             date_started:'',
-                            date_left:'',
+                            date_left:null,
                             duties:'',
                         }}
                         onSubmit={handleSubmit}

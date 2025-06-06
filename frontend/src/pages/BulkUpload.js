@@ -20,6 +20,7 @@ const BulkUpload = () =>{
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState(null);
     const {currentUser} = useContext(AuthContext);
+    const [errors, setErrors] = useState([])
 
     useEffect(()=>{
         const fetchCompanies = async () =>{
@@ -87,18 +88,29 @@ const BulkUpload = () =>{
 
         try{
             const response = await bulkUploadEmployees(values.file, values.companyId);
-            setMessage({
-                type: 'success',
-                text: `Successfully created ${response.data.created_count} employee records.`
-            })
+            if (response.data.created_count && response.data.created_count > 0){
+                setMessage({
+                    type: 'success',
+                    text: `Successfully created ${response.data.created_count} employee records.`
+                })
+            }
             resetForm();
             setPreview([]);
+            setErrors(response.data.errors)
         }catch(error){
             console.error('Error uploading file:', error);
+            if (error.response?.data?.error){
+                if (Array.isArray(error.response.data.error)){
+                    setErrors(error.response.data.error);
+                }else{
+                    setErrors([error.response.data.error]);
+                }
+            }else{
             setMessage({
                 type: 'danger',
                 text: error.response?.data?.message || 'An error occurred while uploading the file.'
             })
+            }
         }finally{
             setIsLoading(false);
         }
@@ -177,6 +189,10 @@ const BulkUpload = () =>{
                                 {message.text}
                             </Alert>
                         )}
+
+                        { errors && errors.length > 0 && errors.map((error,index) =>(
+                            <Alert key={index} variant="danger">{error}</Alert>
+                        ))}
 
                         {preview.length > 0 && (
                             <Card>
