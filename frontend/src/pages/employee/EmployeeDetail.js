@@ -1,10 +1,12 @@
 import Navbar from "../../components/common/Navbar";
 import { Container, Card, Table, Alert, Row, Col} from "react-bootstrap";
 import { getEmployee } from "../../api/api";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Link, useParams, useLocation } from "react-router-dom";
+import { AuthContext } from "../../context/AuthContext";
 
 const EmployeeDetail = () => {
+const { currentUser } = useContext(AuthContext);
 const location = useLocation()
 const [message, setMessage] = useState(location.state?.message || '')
 const {id} = useParams();
@@ -60,6 +62,7 @@ useEffect(() => {
                                 <th>Duties</th>
                                 <th>Date Joined</th>
                                 <th>Date Left</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -72,6 +75,7 @@ useEffect(() => {
                                         <td>{record.duties}</td>
                                         <td>{new Date(record.date_started).toLocaleDateString()}</td>
                                         <td>{record.date_left ? new Date(record.date_left).toLocaleDateString() : 'Present'}</td>
+                                        <td>{!record.date_left && (currentUser.user_type === 'admin' || currentUser?.company.id === record.company_details.id)  ? <Link to={`/update-employment-record/${record.id}`} className="btn btn-primary btn-sm" >Update</Link> : ''}</td>
                                     </tr>
                                 ))
                             ) : (

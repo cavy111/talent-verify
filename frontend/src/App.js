@@ -13,6 +13,7 @@ import CompanyDetail from './pages/company/CompanyDetail';
 import EmployeeList from './pages/employee/EmployeeList';
 import AddEmployee from './pages/employee/AddEmployee';
 import AddEmploymentRecord from './pages/employee/AddEmploymentRecord';
+import UpdateEmploymentRecord from './pages/employee/UpdateEmploymentRecord';
 import EmployeeDetail from './pages/employee/EmployeeDetail';
 import BulkUpload from './pages/BulkUpload';
 // import NotFound from './pages/NotFound';
@@ -38,6 +39,7 @@ function App() {
           <Route path="/employees/:id" element={<PrivateRoute><EmployeeDetail /></PrivateRoute>} />
           <Route path="/add-employee" element={<PrivateRoute><AddEmployee /></PrivateRoute>} />
           <Route path="/add-employment-record/:id" element={<PrivateRoute><AddEmploymentRecord /></PrivateRoute>} />
+          <Route path="/update-employment-record/:id" element={<PrivateRoute><UpdateEmploymentRecord /></PrivateRoute>} />
           <Route path="/bulk-upload" element={<PrivateRoute roles={['admin', 'company']}><BulkUpload /></PrivateRoute>} />
           {/* <Route path="*" element={<NotFound />} /> */}
         </Routes>

@@ -70,6 +70,10 @@ export const getEmploymentRecords = (employeeId) => {
     return api.get(`employees/${employeeId}/employment_records/`);
 }
 
+export const getEmploymentRecord = (employeeId, recordId) => {
+    return api.get(`employees/${employeeId}/employment_records/${recordId}/`);
+}
+
 export const createEmploymentRecord = (employeeId, employmentRecordData) => {
     return api.post(`employees/${employeeId}/employment-records/`, employmentRecordData);
 }
