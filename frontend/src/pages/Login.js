@@ -34,7 +34,7 @@ return(
             <Col md={6}>
                 <Card>
                     <Card.Header as='h3' className='text-center'>
-                    Talent Verify Login
+                    Talent Verify Logins
                     </Card.Header>
                     <Card.Body>
                         {error && <Alert variant='danger'>{error}</Alert>}
