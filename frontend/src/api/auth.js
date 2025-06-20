@@ -1,4 +1,5 @@
 import axios from 'axios';
+import {jwtDecode} from 'jwt-decode'
 
 const API_URL = 'http://localhost:8000/';
 
@@ -37,7 +38,7 @@ export const logout = () => {
 export const getCurrentUser = () => {
   const userString = localStorage.getItem('user');
   if (userString) {
-    return JSON.parse(userString);
+    return JSON.parse(userString)
   }
   return null;
 }

@@ -24,7 +24,7 @@ class UserSerializer(serializers.ModelSerializer):
             username=validated_data['username'],
             email=validated_data.get('email', ''),
             password=validated_data['password'],
-            user_type=validated_data.get('user_type', 'verifier'),
+            user_type=validated_data.get('user_type', 'company'),
             company=company_instance
         )
         return user

@@ -4,9 +4,10 @@ import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { Container, Row, Col, Card, Alert } from 'react-bootstrap';
 import { register } from '../api/auth';
+import Navbar from '../components/common/Navbar';
 
 const RegisterSchema = Yup.object().shape({
-    username: Yup.string().required('Username is required'),
+    username: Yup.string().matches(/^\S*$/,'username should not contain spaces').required('Username is required'),
     password: Yup.string().required('Password is required'),
     confirmPassword: Yup.string()
         .oneOf([Yup.ref('password'), null], 'Passwords must match')
@@ -40,6 +41,8 @@ const Register = () => {
     }
 
     return(
+        <>
+        <Navbar/>
         < Container className="mt-5">
             <Row className="justify-content-center">
                 <Col md={6}>
@@ -58,7 +61,7 @@ const Register = () => {
                                     name: '',
                                     email: '',
                                     employee_count: '',
-                                    registration_date:'',
+                                    registration_date:null,
                                     registration_number:'',
                                     address:'',
                                     contact_person:'',
@@ -198,6 +201,7 @@ const Register = () => {
                 </Col>
             </Row>
         </Container>
+        </>
 )
 
 }

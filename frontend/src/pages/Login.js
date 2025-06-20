@@ -5,6 +5,7 @@ import * as Yup from 'yup';
 import { Container, Row, Col, Card, Alert } from 'react-bootstrap';
 import { AuthContext } from '../context/AuthContext';
 import { login } from '../api/auth';
+import Navbar from '../components/common/Navbar';
 
 const LoginSchema = Yup.object().shape({
     username: Yup.string().required('Username is required'),
@@ -29,6 +30,8 @@ const handleSubmit = async (values,{setSubmitting}) => {
 }
 
 return(
+    <>
+    <Navbar/>
     < Container className="mt-5">
         <Row className="justify-content-center">
             <Col md={6}>
@@ -80,6 +83,7 @@ return(
             </Col>
         </Row>
     </Container>
+    </>
 )
 
 }

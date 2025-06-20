@@ -25,7 +25,7 @@ const Navbar = () => {
                 <BootstrapNavbar.Brand as={Link} to="/">Talent Verify</BootstrapNavbar.Brand>
                 <BootstrapNavbar.Toggle aria-controls="navbar-nav" />
                 <BootstrapNavbar.Collapse id="navbar-nav">
-                    <Nav className='me-auto'>
+                    { currentUser && (<Nav className='me-auto'>
                         <Nav.Link as={Link} to='/'>Dashboard</Nav.Link>
                         <Nav.Link as={Link} to='/companies'>Companies</Nav.Link>
                         <Nav.Link as={Link} to='/employees'>Employees</Nav.Link>
@@ -36,9 +36,9 @@ const Navbar = () => {
                             <Nav.Link as={Link} to='/bulk-upload'>Bulk Upload</Nav.Link>
                         )
                         }
-                    </Nav>
+                    </Nav>)}
 
-                    {currentUser && (
+                    {currentUser ? (
                         <Nav>
                             <Nav.Item className='d-flex align-items-center text-light me-3'>
                                 {currentUser.username}
@@ -46,6 +46,11 @@ const Navbar = () => {
                             <Button variant="outline-light" onClick={handleLogout}>
                                 Logout
                             </Button>
+                        </Nav>
+                    ) : (
+                        <Nav className='ms-auto'>
+                            <Nav.Link as={Link} to='/login'>Login</Nav.Link>
+                            <Nav.Link as={Link} to='/register'>Register</Nav.Link>
                         </Nav>
                     )}
 

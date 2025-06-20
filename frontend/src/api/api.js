@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { getCurrentUser } from './auth';
+import { jwtDecode } from 'jwt-decode';
 
 const API_URL = 'http://localhost:8000/api/';
 
@@ -12,10 +13,28 @@ const api = axios.create({
 
 // Add a request interceptor to include the token in the headers
 api.interceptors.request.use(
-  (config) => {
+  async(config) => {
     const user = getCurrentUser();
-    if (user && user.access) {
-      config.headers['Authorization'] = `Bearer ${user.access}`;
+    if (user) {
+        const now = Date.now()/1000
+        const decoded = jwtDecode(user.access)
+        
+        if (decoded.exp < now){
+            try {
+                const response = await axios.post('http://localhost:8000/users/token/refresh/', {refresh: user.refresh});
+                user.access = response.data.access
+                localStorage.setItem('user',JSON.stringify(user))
+                config.headers['Authorization'] = `Bearer ${response.data.access}`                
+            } catch (error) {
+                console.error("Refresh token failed or expired")
+                localStorage.removeItem('user')
+                window.location.href='/login'
+                return Promise.reject(error)
+            }
+        }else{
+            config.headers['Authorization'] = `Bearer ${user.access}`;
+        }
+        
     }
     return config;
   },
