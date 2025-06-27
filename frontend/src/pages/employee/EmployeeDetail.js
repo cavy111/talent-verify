@@ -75,7 +75,7 @@ useEffect(() => {
                                         <td>{record.duties}</td>
                                         <td>{new Date(record.date_started).toLocaleDateString()}</td>
                                         <td>{record.date_left ? new Date(record.date_left).toLocaleDateString() : 'Present'}</td>
-                                        <td>{!record.date_left && (currentUser.user_type === 'admin' || currentUser?.company.id === record.company_details.id)  ? <Link to={`/update-employment-record/${record.id}`} className="btn btn-primary btn-sm" >Update</Link> : ''}</td>
+                                        <td>{!record.date_left && (currentUser.user_type === 'admin' || currentUser?.company.id === record.company_details.id)  ? <Link to={`/employees/${employee.id}/employment-record/${record.id}/update`} className="btn btn-primary btn-sm" >Update</Link> : ''}</td>
                                     </tr>
                                 ))
                             ) : (

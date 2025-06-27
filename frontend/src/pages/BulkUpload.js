@@ -48,7 +48,7 @@ const BulkUpload = () =>{
 
         const fileExtension = file.name.split('.').pop().toLowerCase();
 
-        if (fileExtension === 'csv'){
+        if (['csv','txt'].includes(fileExtension)){
             Papa.parse(file, {
                 header: true,
                 skipEmptyLines: true,
@@ -57,7 +57,7 @@ const BulkUpload = () =>{
                 setPreview(results.data);
             }            
         })
-        }else if (['xlsx', 'xls'].includes(fileExtension)){
+        }else if (fileExtension === 'xlsx'){
             const reader = new FileReader()
             reader.onload = (e) =>{
                 const data = new Uint8Array(e.target.result);
@@ -88,10 +88,10 @@ const BulkUpload = () =>{
 
         try{
             const response = await bulkUploadEmployees(values.file, values.companyId);
-            if (response.data.created_count && response.data.created_count > 0){
+            if (response.data){
                 setMessage({
                     type: 'success',
-                    text: `Successfully created ${response.data.created_count} employee records.`
+                    text: `Bulk upload was successful: ${response.data.emp_created_count} new employee records added, ${response.data.rec_updated_count} employment records updated and ${response.data.rec_created_count} new employment records added.`
                 })
             }
             resetForm();
@@ -159,11 +159,11 @@ const BulkUpload = () =>{
                                     <Form.Label>Upload File</Form.Label>
                                     <Form.Control 
                                     type="file"
-                                    accept=".csv, .xlsx, .xls"
+                                    accept=".csv, .xlsx, .txt"
                                     onChange={(event) => handleFileChange(event, setFieldValue)}
                                     />
                                     <Form.Text className="text-muted">
-                                        Supported formats: CSV, Excel (xlsx, xls), Text
+                                        Supported formats: CSV, Excel, Text
                                     </Form.Text>
                                     {touched.file && errors.file && (
                                         <div className="text-danger">{errors.file}</div>

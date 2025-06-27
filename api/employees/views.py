@@ -1,3 +1,5 @@
+import openpyxl.utils
+import openpyxl.utils.datetime
 from rest_framework import viewsets, status
 from .models import Employee, EmploymentRecord
 from .serializers import EmployeeSerializer, EmployeeRecordSerializer
@@ -9,6 +11,7 @@ from rest_framework import filters
 from rest_framework.permissions import IsAuthenticated
 from core.permissions import IsCompanyUser, IsTalentVerifyAdmin
 from api.companies.models import Department
+import openpyxl
 
 class EmployeeViewSet(viewsets.ModelViewSet):
     queryset = Employee.objects.all()
@@ -31,17 +34,17 @@ class EmployeeViewSet(viewsets.ModelViewSet):
             permission_classes = []
         return [permission() for permission in permission_classes]
     
-    def get_queryset(self):
-        """
-        Company users can only see employees with records at their company.
-        Talent Verify admins can see all employees.
-        """
-        user = self.request.user
-        if user.user_type == 'admin':
-            return Employee.objects.all()
-        elif user.user_type == 'company':
-            return Employee.objects.filter(employment_records__company=user.company).distinct()
-        return Employee.objects.all()
+    # def get_queryset(self):
+    #     """
+    #     Company users can only see employees with records at their company.
+    #     Talent Verify admins can see all employees.
+    #     """
+    #     user = self.request.user
+    #     if user.user_type == 'admin':
+    #         return Employee.objects.all()
+    #     elif user.user_type == 'company':
+    #         return Employee.objects.filter(employment_records__company=user.company).distinct()
+    #     return Employee.objects.all()
 
     @action(detail=False, methods=['get'])
     def search(self, request):
@@ -81,6 +84,7 @@ class EmployeeViewSet(viewsets.ModelViewSet):
         
         file = request.FILES.get('file')
         company_id = request.data.get('company_id')
+        required_fields = ['employee_name', 'department_name', 'role', 'date_started']
 
         if not company_id:
             return Response({"error": "Company ID is required"}, status=status.HTTP_400_BAD_REQUEST)
@@ -88,25 +92,52 @@ class EmployeeViewSet(viewsets.ModelViewSet):
         if not file:
             return Response({"error": "No file provided"}, status=status.HTTP_400_BAD_REQUEST)
         
-        try:
-            decoded_file = file.read().decode('utf-8')
-        except UnicodeDecodeError:
-            file.seek(0)
-            decoded_file = file.read().decode('latin1')
-        io_string = io.StringIO(decoded_file)
+        file_name = file.name.lower()
+        if file_name.endswith('.csv') or file_name.endswith('.txt'):
+            try:
+                decoded_file = file.read().decode('utf-8')
+            except UnicodeDecodeError:
+                file.seek(0)
+                decoded_file = file.read().decode('latin1')
+            io_string = io.StringIO(decoded_file)
 
-        reader = csv.DictReader(io_string)
+            reader = csv.DictReader(io_string)
 
-        required_fields = ['employee_name', 'department_name', 'company_id', 'role', 'date_started']
+            missing_fields = [field for field in required_fields if field not in reader.fieldnames]
 
-        missing_fields = [field for field in required_fields if field not in reader.fieldnames]
+            if missing_fields:
+                return Response({"error": f"CSV or text file is missing required fields: {', '.join(missing_fields)}"}, 
+                                status=status.HTTP_400_BAD_REQUEST)
+            
+        elif file_name.endswith('.xlsx'):
+            wb = openpyxl.load_workbook(file)
+            sheet = wb.active
+            headers = [cell.value for cell in next(sheet.iter_rows(min_row=1,max_row=1))]
 
-        if missing_fields:
-            return Response({"error": f"CSV file is missing required fields: {', '.join(missing_fields)}"}, 
-                            status=status.HTTP_400_BAD_REQUEST)
+            missing_fields = [field for field in required_fields if field not in headers]
 
-        created_count = 0
-        updated_count = 0
+            if missing_fields:
+                return Response({"error": f"excel file is missing required fields: {', '.join(missing_fields)}"}, 
+                                status=status.HTTP_400_BAD_REQUEST)
+            
+            reader = []
+            for row in sheet.iter_rows(min_row=2, values_only=True):
+                row_dict = dict(zip(headers,row))
+                for date_field in ['date_started','date_left']:
+                    value = row_dict.get(date_field)
+                    if isinstance(value,(int,float)):
+                        try:
+                            row_dict[date_field] = openpyxl.utils.datetime.from_excel(value).date()
+                        except Exception:
+                            row_dict[date_field] = None
+                reader.append(row_dict)
+        else:
+            return Response({'error':'Unsupported file format'},status=status.HTTP_400_BAD_REQUEST)
+
+        emp_created_count = 0
+        rec_created_count = 0
+        emp_updated_count = 0
+        rec_updated_count = 0
         errors = []
 
         for row in reader:
@@ -119,9 +150,9 @@ class EmployeeViewSet(viewsets.ModelViewSet):
                     }
                 )
                 if created:
-                    created_count += 1
+                    emp_created_count += 1
                 else:
-                    updated_count += 1
+                    emp_updated_count += 1
                     
                 # Get or create department
                 department, _ = Department.objects.get_or_create(
@@ -129,25 +160,39 @@ class EmployeeViewSet(viewsets.ModelViewSet):
                     name=row['department_name']
                 )
                 
-                # Create employment record
-                employment_record, _ = EmploymentRecord.objects.update_or_create(
-                    employee=employee,
-                    company_id=company_id,
-                    department=department,
-                    role=row['role'],
-                    defaults={
-                        'date_started': row['date_started'],
-                        'date_left': row.get('date_left') or None,
-                        'duties': row.get('duties', ''),
-                    }
-                )
+                existing_record = EmploymentRecord.objects.filter(employee=employee,
+                                                                  company_id=company_id,
+                                                                  department=department,
+                                                                  role=row['role'],
+                                                                  date_started=row['date_started'],
+                                                                  duties=row['duties']).first()
+                if existing_record:
+                    if not existing_record.date_left and row['date_left']:
+                        print(existing_record)
+                        existing_record.date_left=row['date_left']
+                        existing_record.save()
+                        rec_updated_count+=1
+                else:
+                    # Create employment record
+                    employment_record= EmploymentRecord.objects.create(
+                        employee=employee,
+                        company_id=company_id,
+                        department=department,
+                        role=row['role'],
+                        date_started = row['date_started'],
+                        date_left = row.get('date_left') or None,
+                        duties = row.get('duties', ''),
+                    )
+                    rec_created_count+=1
 
             except Exception as e:
                 errors.append(f"Error processing row {row}: {str(e)}")
 
         return Response({
-            'created_count': created_count,
-            'updated_count': updated_count,
+            'emp_created_count': emp_created_count,
+            'rec_created_count': rec_created_count,
+            'emp_updated_count': emp_updated_count,
+            'rec_updated_count': rec_updated_count,
             'errors': errors
         })
     

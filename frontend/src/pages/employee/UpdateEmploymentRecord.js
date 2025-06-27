@@ -1,74 +1,51 @@
 import { Button, Card, Col, Container, Form, Row, Alert } from "react-bootstrap";
 import Navbar from "../../components/common/Navbar";
 import { Formik, Form as FormikForm } from "formik";
-import { createEmploymentRecord } from "../../api/api";
 import { useParams, useNavigate } from "react-router-dom";
 import * as Yup from 'yup';
-import { AuthContext } from "../../context/AuthContext";
-import { useContext, useEffect, useState } from "react";
-import { getCompanies, getCompanyDepartments, getEmploymentRecord } from "../../api/api";
+import {useEffect, useState } from "react";
+import { getEmploymentRecord,updateEmpRecord } from "../../api/api";
 
 const EmployementRecordSchema = Yup.object().shape({
-    company: Yup.string().required('Company is required'),
-    department: Yup.string().required('Department is required'),
-    role: Yup.string().required('Role is required'),
-    date_started: Yup.date().required('Date started is required'),
     date_left: Yup.date().required('Date left is required'),
-    duties: Yup.string().required('Duties are required')
-
 })
 
 const UpdateEmploymentRecord = () => {
-    const {currentUser} = useContext(AuthContext)
-    const {id} = useParams();
+    const {employeeId, recordId} = useParams();
     const navigate = useNavigate();
     const [error, setError] = useState('');
-    const [companies, setCompanies] = useState([])
-    const [departments, setDepartments] = useState([])
-    const [selectedCompanyId, setSelectedCompanyId] = useState(currentUser.user_type ==='company' ? currentUser.company.id : '')
+    const [empRecord, setEmpRecord] = useState({})
 
-    useEffect(()=>{
-        const fetchCompanies = async() =>{
-            try{
-                const response = await getCompanies()
-                setCompanies(response.data)
-            }catch(error){
-                console.log('error fetching companies', error)
+    useEffect(()=>{        
+        const fetchEmpRecord = async() =>{
+            try {
+                const response = await getEmploymentRecord(employeeId,recordId)
+                setEmpRecord(response.data)
+            } catch (error) {
+                console.log('an error occured:',error);
             }
         }
-        fetchCompanies()
-    },[])
+        fetchEmpRecord()
+    },[employeeId,recordId])
 
-    const fetchDepartments = async(companyId) =>{
-        try{
-            const response = await getCompanyDepartments(companyId)
-            setDepartments(response.data)
-        }catch(error){
-            console.log('error fetching departments:',error);
-        }
-    }
-
-    useEffect(()=>{
-        if (selectedCompanyId){
-            fetchDepartments(selectedCompanyId)
-        }else{
-            setDepartments([])
-        }
-    },[selectedCompanyId])
-
-    const handleSubmit = async(values) => {
+    const handleSubmit = async(values,{setErrors}) => {
         try {
-            // values.department = parseInt(values.department || '0', 10)
-            const response = await createEmploymentRecord(id, values);
-            console.log('Employment record created:', response.data);
-            navigate(`/employees/${id}`, {state: {message: 'Employment record added successfully!'}});
+            console.log(values);
+            
+            const response = await updateEmpRecord(employeeId, recordId, values);
+            console.log('Employment record updated:', response.data);
+            navigate(`/employees/${employeeId}`, {state: {message: 'Employment record updated successfully!'}});
 
         } catch (error) {
-            console.error('Error creating employment record:', error);
-            setError('Failed to add employment record. Please try again.');
+            if(error.response && error.response.data){
+                setErrors(error.response.data)
+            }else{
+                console.error('Error updating employment record:', error);
+                setError('Failed to update employment record. Please try again.');
+            }
         }
     }
-
+    
     return(
         <>
         <Navbar />
@@ -77,18 +54,19 @@ const UpdateEmploymentRecord = () => {
                 <Col md={6}>
                 <Card className="mt-4 mb-4">
                     <Card.Header>
-                        <Card.Title className="text-center">Add Employment Record</Card.Title>
+                        <Card.Title className="text-center">Update Employment Record</Card.Title>
                     </Card.Header>
                     <Card.Body>
                         <Formik
                         initialValues={{
-                            company: currentUser.user_type ==='company' ? currentUser.company.id : '',
-                            department:'',
-                            role:'',
-                            date_started:'',
+                            company: empRecord?.company_details?.id || '',
+                            department: empRecord?.department_details?.id || '',
+                            role:empRecord.role || '',
+                            date_started:empRecord.date_started || null,
                             date_left:null,
-                            duties:'',
+                            duties:empRecord.duties || '',
                         }}
+                        enableReinitialize={true}
                         onSubmit={handleSubmit}
                         validationSchema={EmployementRecordSchema}
                         >
@@ -102,60 +80,29 @@ const UpdateEmploymentRecord = () => {
                                 <Form.Select
                                 name="company"
                                 value={values.company}
-                                onChange={(e)=>{
-                                    setFieldValue('company',e.target.value)
-                                    setFieldValue('department', '')
-                                    setSelectedCompanyId(e.target.value)
-                                }}
-                                disabled={currentUser.user_type === 'company'}
-                                onBlur={handleBlur}
-                                isInvalid={touched.company && !!errors.company}
-                                isValid={touched.company && !errors.company}
+                                disabled
                                 >
-                                    <option value=''>Choose Company</option>
-                                    {companies.map(company=>(
-                                        <option key={company.id} value={company.id}>{company.name}</option>
-                                    ))}
+                                    <option value={empRecord?.company_details?.id}>{empRecord?.company_details?.name}</option>
                                 </Form.Select>
-                                {touched.company && errors.company && (
-                                    <div className="text-danger">{errors.company}</div>
-                                )}
                             </Form.Group>
                             <Form.Group className="mb-3">
                                 <Form.Label>Department</Form.Label>
                                 <Form.Select
                                 name="department"
                                 value={values.department}
-                                onBlur={handleBlur}
-                                onChange={(e)=>setFieldValue('department',e.target.value)}
-                                isInvalid={touched.department && !!errors.department}
-                                isValid={touched.department && !errors.department}
+                                disabled
                                 >
-                                    <option value=''>Choose Department</option>
-                                    {departments.map(department=>(
-                                        <option key={department.id} value={department.id}>{department.name}</option>
-                                    ))}
+                                    <option value={empRecord?.department_details?.id}>{empRecord?.department_details?.name}</option>
                                 </Form.Select>
-                                {touched.department && errors.department && (
-                                    <div className="text-danger">{errors.department}</div>
-                                )}
                             </Form.Group>
                             <Form.Group className="mb-3">
                                 <Form.Label>Role</Form.Label>
                                 <Form.Control
                                 type="text"
-                                placeholder="Enter role"
                                 name="role"
-                                isInvalid={touched.role && !!errors.role}
-                                isValid={touched.role && !errors.role}
                                 value={values.role}
-                                onChange={(e)=>setFieldValue('role',e.target.value)}
-                                onBlur={handleBlur}
-
+                                    disabled
                                 />
-                                {touched.role && errors.role && (
-                                    <div className="text-danger">{errors.role}</div>
-                                )}
                             </Form.Group>
                             <Form.Group className="mb-3">
                                 <Form.Label>Date Started</Form.Label>
@@ -163,14 +110,8 @@ const UpdateEmploymentRecord = () => {
                                 type="date"
                                 value={values.date_started}
                                 name="date_started"
-                                onBlur={handleBlur}
-                                isValid={touched.date_started && !errors.date_started}
-                                isInvalid={touched.date_started && !!errors.date_started}
-                                onChange={(e)=>setFieldValue('date_started', e.target.value)}
+                                disabled
                                 />
-                                 {touched.date_started && errors.date_started && (
-                                    <div className="text-danger">{errors.date_started}</div>
-                                )}
                             </Form.Group>
                             <Form.Group className="mb-3">
                                 <Form.Label>Date Left</Form.Label>
@@ -192,17 +133,10 @@ const UpdateEmploymentRecord = () => {
                                 <Form.Control
                                 as="textarea"
                                 rows={3}
-                                placeholder="Printing, packaging, and shipping products"
-                                isInvalid={touched.duties && !!errors.duties}
-                                isValid={touched.duties && !errors.duties}
                                 value={values.duties}
-                                onBlur={handleBlur}
-                                onChange={(e)=>setFieldValue('duties',e.target.value)}
+                                disabled
                                 name="duties"
                                 />
-                                 {touched.duties && errors.duties && (
-                                    <div className="text-danger">{errors.duties}</div>
-                                )}
                             </Form.Group>
                             <Button disabled={isSubmitting} variant="primary" type="submit">
                                 {isSubmitting ? 'Updating' : 'Update'}

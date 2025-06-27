@@ -1,6 +1,7 @@
 from django.db import models
 from api.companies.models import Company, Department
 from encrypted_model_fields.fields import EncryptedCharField
+from django.core.exceptions import ValidationError
 
 class Employee(models.Model):
     name = models.CharField(max_length=255, unique=True)
@@ -22,3 +23,7 @@ class EmploymentRecord(models.Model):
     
     def __str__(self):
         return f"{self.employee.name} - {self.role} at {self.company.name}"
+    
+    def clean(self):
+        if self.date_left < self.date_started:
+            raise ValidationError("Date left cannot be earlier than date started")

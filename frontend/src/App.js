@@ -39,7 +39,7 @@ function App() {
           <Route path="/employees/:id" element={<PrivateRoute><EmployeeDetail /></PrivateRoute>} />
           <Route path="/add-employee" element={<PrivateRoute><AddEmployee /></PrivateRoute>} />
           <Route path="/add-employment-record/:id" element={<PrivateRoute><AddEmploymentRecord /></PrivateRoute>} />
-          <Route path="/update-employment-record/:id" element={<PrivateRoute><UpdateEmploymentRecord /></PrivateRoute>} />
+          <Route path="/employees/:employeeId/employment-record/:recordId/update" element={<PrivateRoute><UpdateEmploymentRecord /></PrivateRoute>} />
           <Route path="/bulk-upload" element={<PrivateRoute roles={['admin', 'company']}><BulkUpload /></PrivateRoute>} />
           {/* <Route path="*" element={<NotFound />} /> */}
         </Routes>

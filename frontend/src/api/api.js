@@ -90,7 +90,11 @@ export const getEmploymentRecords = (employeeId) => {
 }
 
 export const getEmploymentRecord = (employeeId, recordId) => {
-    return api.get(`employees/${employeeId}/employment_records/${recordId}/`);
+    return api.get(`employees/${employeeId}/employment-records/${recordId}/`);
+}
+
+export const updateEmpRecord = (employeeId, recordId,employmentRecordData) => {
+    return api.put(`employees/${employeeId}/employment-records/${recordId}/`, employmentRecordData);
 }
 
 export const createEmploymentRecord = (employeeId, employmentRecordData) => {
