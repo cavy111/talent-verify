@@ -31,6 +31,14 @@ AUTH_USER_MODEL = 'users.CustomUser'
 
 FIELD_ENCRYPTION_KEY = 'riiXWRsCcNQTuSY4w5NNrAKDEQ5uH9d3PmPrywE-qJY='
 
+# session
+SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Strict'
+
+CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_SAMESITE = 'Strict'
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -60,6 +68,15 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
+    'DEFAULT_THROTTLE_CLASSES':[
+        'rest_framework.throttling.UserRateThrottle',
+        'rest_framework.throttling.AnonRateThrottle'
+    ],
+    'DEFAULT_THROTTLE_RATES':{
+        'anon':'10/minute',
+        'user':'100/minute',
+        'login':'5/minute'
+    }
 }
 
 # JWT settings
