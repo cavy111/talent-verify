@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Company, Department
+import re
 
 class DepartmentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -18,6 +19,11 @@ class DepartmentSerializer(serializers.ModelSerializer):
 
 class CompanySerializer(serializers.ModelSerializer):
     departments = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+
+    def validate_name(self,value):
+        if re.search(r'<[^>]+>', value):
+            raise serializers.ValidationError('HTML tags are not allowed in company name')
+        return value
 
     class Meta:
         model = Company
